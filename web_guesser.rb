@@ -1,32 +1,49 @@
 require 'sinatra'
 require 'sinatra/reloader'
 
-	@@guess_count = 0
-	SECRET_NUMBER = rand(101)
 
 	
+	@@secret_number  = rand(101)
+	@@guessed = false
+	@@guess_count = 0
+
 
 get '/' do 
 	guess = params['guess']
-	count = @@guess_count += 1
 	process_guess(guess)
-	diff = check_diff(guess)
-	message = check_guess(diff)
-	color = get_color(diff)
+	
 
-	erb :index, :locals => {:message => message, :color => color, :count => count}
+	erb :index, :locals => {:message => @message, :color => @color, :count => @@guess_count, :number => @@secret_number}
 
 	
 end
 
+
+
 def process_guess(guess)
+	@@guess_count += 1
+
+	diff = check_diff(guess)
+	@message = check_guess(diff)
+	@color = get_color(diff)
+	if @@guess_count > 3
+		new_game
+	end	
+	
+end
+
+def new_game
+	@@secret_number  = rand(101)
+	@@guessed = false
+	@@guess_count = 0
+
 	
 end
 
 
 def check_diff(guess)
 	guess_int = guess.to_i
-	diff = (SECRET_NUMBER - guess_int)
+	diff = (@@secret_number - guess_int)
 	return diff
 end
 
@@ -38,7 +55,7 @@ def check_guess(diff)
 	when 1..5
 		"Too Low"
 	when 0
-			"Correct! The secret number was #{SECRET_NUMBER}"
+			"Correct! The secret number was #{@@secret_number}"
 	else
 		if diff < -5 
 			"Way too high"
@@ -63,4 +80,9 @@ def get_color(diff)
 	
 end
 
-#do extensions
+
+
+game = Game.new
+
+
+#currently on new branch testing guess count and a way to end game
